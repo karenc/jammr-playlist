@@ -19,7 +19,8 @@ FILES
 
  * __README.md__: this file, contains installation and usage instructions
  * __tests.html__: QUnit tests for jammr.playlist
- * __lib__: directories with libraries used by jammr.playlist, used by tests
+ * __lib__: directory with libraries used by jammr.playlist, used by tests
+ * __files__: media files for QUnit tests
  * __js/jammr\_playlist.js__: the jammr.playlist widget
  * __js/jammr\_playlist\_tests.js__: QUnit tests for jammr.playlist
 

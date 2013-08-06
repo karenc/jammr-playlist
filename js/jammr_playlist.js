@@ -29,6 +29,15 @@
                             mediaElement.play();
                         }
                     }
+                    $(domObject).on('ended', function() {
+                        this_.nextTrack();
+                        track = this_.getTrack();
+                        if (track) {
+                            mediaElement.setSrc(track);
+                            mediaElement.load();
+                            mediaElement.play();
+                        }
+                    });
                 }
             });
         },
@@ -38,7 +47,7 @@
         },
 
         getTrack: function() {
-            if (this.playlist.length > 0) {
+            if (this.playlist.length > 0 && this.currentTrack < this.playlist.length) {
                 return this.playlist[this.currentTrack]['mixUrl'];
             }
         },
