@@ -26,7 +26,9 @@
                         mediaElement.setSrc(track);
                         mediaElement.load();
                         if (this_.options.autoPlay) {
-                            mediaElement.play();
+                            $(domObject).on('canplaythrough', function() {
+                                mediaElement.play();
+                            });
                         }
                     }
                     $(domObject).on('ended', function() {

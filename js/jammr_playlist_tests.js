@@ -17,7 +17,7 @@
         strictEqual($('audio').length, 1, 'there should be one audio element');
     });
 
-    test('initialization of playlist', function() {
+    asyncTest('initialization of playlist', function() {
         $('<audio>').appendTo('body').playlist({
             playlist: [{
                 "startDate": "2013-07-16T05:28Z",
@@ -25,14 +25,18 @@
                 "owner": "stefanha",
                 "users": ["stefanha", "lennard", "andhai"],
                 "url": "http://jammr.net/recorded_jams/2",
-                "mixUrl": "http://objects.dreamhost.com/jammr/20130803_1802_5luj3iKxLy.m4a",
+                "mixUrl": "files/1.m4a",
                 "tracksUrl": "http://test.jammr.net/secret/tracks.zip"
             }]
         });
-        strictEqual($('audio').length, 1, 'there should be one audio element');
-        strictEqual($('audio')[0].paused, false, 'the audio should be playing automatically');
-        strictEqual($('audio')[0].muted, false, 'the audio should not be muted');
-        strictEqual($('audio')[0].src, 'http://objects.dreamhost.com/jammr/20130803_1802_5luj3iKxLy.m4a', 'the src should be set to the first mixUrl of the playlist');
+
+        $('audio').on('canplaythrough', function() {
+            strictEqual($('audio').length, 1, 'there should be one audio element');
+            strictEqual($('audio')[0].paused, false, 'the audio should be playing automatically');
+            strictEqual($('audio')[0].muted, false, 'the audio should not be muted');
+            ok(endsWith($('audio')[0].src, 'files/1.m4a'), 'the src should be set to the first mixUrl of the playlist');
+            start();
+        });
     });
 
     test('auto play set to false', function() {
@@ -44,14 +48,14 @@
                 "owner": "stefanha",
                 "users": ["stefanha", "lennard", "andhai"],
                 "url": "http://jammr.net/recorded_jams/2",
-                "mixUrl": "http://objects.dreamhost.com/jammr/20130803_1802_5luj3iKxLy.m4a",
+                "mixUrl": "files/3.m4a",
                 "tracksUrl": "http://test.jammr.net/secret/tracks.zip"
             }]
         });
         strictEqual($('audio').length, 1, 'there should be one audio element');
         strictEqual($('audio')[0].paused, true, 'the audio should not be playing automatically');
         strictEqual($('audio')[0].muted, false, 'the audio should not be muted');
-        strictEqual($('audio')[0].src, 'http://objects.dreamhost.com/jammr/20130803_1802_5luj3iKxLy.m4a', 'the src should be set to the first mixUrl of the playlist');
+        ok(endsWith($('audio')[0].src, 'files/3.m4a'), 'the src should be set to the first mixUrl of the playlist');
     });
 
     asyncTest('play tracks as ordered in playlist', function() {
@@ -79,35 +83,39 @@
                 "owner": "stefanha",
                 "users": ["stefanha", "lennard", "andhai"],
                 "url": "http://jammr.net/recorded_jams/2",
-                "mixUrl": "http://objects.dreamhost.com/jammr/20130803_1802_5luj3iKxLy.m4a",
+                "mixUrl": "files/3.m4a",
                 "tracksUrl": "http://test.jammr.net/secret/tracks.zip"
             }]
         });
 
-        // first track
-        strictEqual($('audio').length, 1, 'there should be one audio element');
-        strictEqual($('audio')[0].paused, false, 'the audio should be playing automatically');
-        strictEqual($('audio')[0].muted, false, 'the audio should not be muted');
-        ok(endsWith($('audio')[0].src, 'files/1.m4a'), 'the src should be set to the first mixUrl of the playlist');
-
-        $('audio').on('ended.tests', function() {
-            // second track
+        $('audio').on('canplaythrough.tests', function() {
+            // first track
             strictEqual($('audio').length, 1, 'there should be one audio element');
             strictEqual($('audio')[0].paused, false, 'the audio should be playing automatically');
             strictEqual($('audio')[0].muted, false, 'the audio should not be muted');
-            ok(endsWith($('audio')[0].src, 'files/2.m4a'), 'the src should be set to the next mixUrl of the playlist');
-            $('audio').off('ended.tests');
+            ok(endsWith($('audio')[0].src, 'files/1.m4a'), 'the src should be set to the first mixUrl of the playlist');
+            $('audio').off('canplaythrough.tests');
 
-            $('audio').on('ended.tests', function() {
-                // third track
+            $('audio').on('canplaythrough.tests', function() {
+                // second track
                 strictEqual($('audio').length, 1, 'there should be one audio element');
                 strictEqual($('audio')[0].paused, false, 'the audio should be playing automatically');
                 strictEqual($('audio')[0].muted, false, 'the audio should not be muted');
-                strictEqual($('audio')[0].src, 'http://objects.dreamhost.com/jammr/20130803_1802_5luj3iKxLy.m4a', 'the src should be set to the next mixUrl of the playlist');
-                start();
-                clearTimeout(t);
+                ok(endsWith($('audio')[0].src, 'files/2.m4a'), 'the src should be set to the next mixUrl of the playlist');
+                $('audio').off('canplaythrough.tests');
+
+                $('audio').on('canplaythrough.tests', function() {
+                    // third track
+                    strictEqual($('audio').length, 1, 'there should be one audio element');
+                    strictEqual($('audio')[0].paused, false, 'the audio should be playing automatically');
+                    strictEqual($('audio')[0].muted, false, 'the audio should not be muted');
+                    ok(endsWith($('audio')[0].src, 'files/3.m4a'), 'the src should be set to the next mixUrl of the playlist');
+                    start();
+                    clearTimeout(t);
+                });
             });
         });
+
         t = setTimeout(function() { ok(false, 'test timed out'), start(); }, 10000);
     });
 
