@@ -21,38 +21,63 @@
             this.player = new MediaElementPlayer(this.element[0], {
                 type: this.options.mediaType,
                 success: function(mediaElement, domObject) {
-                    var track = this_.getTrack();
-                    if (track) {
-                        mediaElement.setSrc(track);
-                        mediaElement.load();
-                        if (this_.options.autoPlay) {
-                            $(domObject).on('canplaythrough', function() {
-                                mediaElement.play();
-                            });
-                        }
-                    }
-                    $(domObject).on('ended', function() {
-                        this_.nextTrack();
-                        track = this_.getTrack();
-                        if (track) {
-                            mediaElement.setSrc(track);
-                            mediaElement.load();
-                            mediaElement.play();
-                        }
+                    this_.mediaElement = mediaElement;
+                    this_.domObject = domObject;
+
+                    this_.getPlaylist(function() {
+                        this_.start();
+                        this_.playNextTrackOnEnded();
                     });
                 }
             });
         },
 
-        nextTrack: function() {
-            this.currentTrack++;
+        start: function() {
+            var this_ = this;
+            this.loadTrack(function(track) {
+                if (this_.options.autoPlay) {
+                    this_.mediaElement.play();
+                }
+            });
         },
 
-        getTrack: function() {
+        playNextTrackOnEnded: function() {
+            var this_ = this;
+            $(this.domObject).on('ended', function() {
+                this_.currentTrack++;
+                this_.loadTrack(function(track) {
+                    this_.mediaElement.play();
+                });
+            });
+        },
+
+        loadTrack: function(callback) {
+            var this_ = this;
+            function _callback(track) {
+                if (track) {
+                    this_.mediaElement.setSrc(track);
+                    this_.mediaElement.load();
+                    $(this_.domObject).on('canplaythrough', function() {
+                        callback(track);
+                    });
+                }
+            }
+
             if (this.playlist.length > 0 && this.currentTrack < this.playlist.length) {
-                return this.playlist[this.currentTrack]['mixUrl'];
+                _callback(this.playlist[this.currentTrack]['mixUrl']);
             }
         },
+
+        getPlaylist: function(callback) {
+            if (this.playlist.length === 0 && this.url) {
+                $.getJSON(this.url, function(data) {
+                    this.playlist = data;
+                    callback();
+                });
+            } else {
+                callback();
+            }
+        }
 
     });
 }(jQuery));
