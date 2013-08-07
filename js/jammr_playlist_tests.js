@@ -30,7 +30,7 @@
             }]
         });
 
-        $('audio').on('canplaythrough', function() {
+        $('audio').on('play.tests', function() {
             strictEqual($('audio').length, 1, 'there should be one audio element');
             strictEqual($('audio')[0].paused, false, 'the audio should be playing automatically');
             strictEqual($('audio')[0].muted, false, 'the audio should not be muted');
@@ -88,23 +88,23 @@
             }]
         });
 
-        $('audio').on('canplaythrough.tests', function() {
+        $('audio').on('play.tests', function() {
             // first track
             strictEqual($('audio').length, 1, 'there should be one audio element');
             strictEqual($('audio')[0].paused, false, 'the audio should be playing automatically');
             strictEqual($('audio')[0].muted, false, 'the audio should not be muted');
             ok(endsWith($('audio')[0].src, 'files/1.m4a'), 'the src should be set to the first mixUrl of the playlist');
-            $('audio').off('canplaythrough.tests');
+            $('audio').off('play.tests');
 
-            $('audio').on('canplaythrough.tests', function() {
+            $('audio').on('play.tests', function() {
                 // second track
                 strictEqual($('audio').length, 1, 'there should be one audio element');
                 strictEqual($('audio')[0].paused, false, 'the audio should be playing automatically');
                 strictEqual($('audio')[0].muted, false, 'the audio should not be muted');
                 ok(endsWith($('audio')[0].src, 'files/2.m4a'), 'the src should be set to the next mixUrl of the playlist');
-                $('audio').off('canplaythrough.tests');
+                $('audio').off('play.tests');
 
-                $('audio').on('canplaythrough.tests', function() {
+                $('audio').on('play.tests', function() {
                     // third track
                     strictEqual($('audio').length, 1, 'there should be one audio element');
                     strictEqual($('audio')[0].paused, false, 'the audio should be playing automatically');
@@ -116,6 +116,43 @@
             });
         });
 
+        t = setTimeout(function() { ok(false, 'test timed out'), start(); }, 10000);
+    });
+
+    asyncTest('get playlist using an ajax request', function() {
+        var t;
+        $('<audio>').appendTo('body').playlist({
+            url: 'http://localhost:8000/'
+        });
+        $('audio').on('play.tests', function() {
+            // first track
+            strictEqual($('audio').length, 1, 'there should be one audio element');
+            strictEqual($('audio')[0].paused, false, 'the audio should be playing automatically');
+            strictEqual($('audio')[0].muted, false, 'the audio should not be muted');
+            ok(endsWith($('audio')[0].src, 'files/1.m4a'), 'the src should be set to the first mixUrl of the playlist');
+
+            $('audio').off('play.tests');
+            $('audio').on('play.tests', function() {
+                // second track
+                strictEqual($('audio').length, 1, 'there should be one audio element');
+                strictEqual($('audio')[0].paused, false, 'the audio should be playing automatically');
+                strictEqual($('audio')[0].muted, false, 'the audio should not be muted');
+                ok(endsWith($('audio')[0].src, 'files/2.m4a'), 'the src should be set to the next mixUrl of the playlist');
+
+                $('audio').off('play.tests');
+
+                $('audio').on('play.tests', function() {
+                    // third track
+                    strictEqual($('audio').length, 1, 'there should be one audio element');
+                    strictEqual($('audio')[0].paused, false, 'the audio should be playing automatically');
+                    strictEqual($('audio')[0].muted, false, 'the audio should not be muted');
+                    ok(endsWith($('audio')[0].src, 'files/3.m4a'), 'the src should be set to the next mixUrl of the playlist');
+
+                    start();
+                    clearTimeout(t);
+                });
+            });
+        });
         t = setTimeout(function() { ok(false, 'test timed out'), start(); }, 10000);
     });
 

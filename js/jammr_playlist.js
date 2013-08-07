@@ -70,8 +70,9 @@
 
         getPlaylist: function(callback) {
             if (this.playlist.length === 0 && this.url) {
+                var this_ = this;
                 $.getJSON(this.url, function(data) {
-                    this.playlist = data;
+                    this_.playlist = data;
                     callback();
                 });
             } else {
